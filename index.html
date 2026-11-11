@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123b73">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>KPSS Cepte</title>
+<style>
+:root{--navy:#123b73;--blue:#2468b4;--bg:#f3f6fb;--ink:#17243a;--muted:#68778d;--line:#e1e8f1;--green:#16845b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,#123b73,#2468b4);color:white;padding:24px 20px 28px;border-radius:0 0 24px 24px}
+.brand{font-size:13px;letter-spacing:1.5px;opacity:.85;font-weight:700}.hero{font-size:27px;font-weight:800;margin:10px 0 5px}.sub{opacity:.86;font-size:14px}
+main{max-width:650px;margin:auto;padding:18px 16px 40px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:-5px}
+.stat,.panel,.subject{background:white;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 3px 12px #17365d0a}
+.stat strong{display:block;font-size:22px;color:var(--navy)}.stat span{font-size:11px;color:var(--muted)}
+h2{font-size:18px;margin:24px 2px 12px}.subjects{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.subject{cursor:pointer;text-align:left;color:var(--ink);font:inherit}.subject b{display:block;margin:7px 0 3px}.subject small{color:var(--muted)}.emoji{font-size:25px}
+button{border:0;cursor:pointer;font:inherit}.primary{background:var(--blue);color:white;padding:14px 16px;border-radius:12px;font-weight:700;width:100%}.secondary{background:#eaf1fa;color:var(--navy);padding:12px;border-radius:12px;font-weight:700;width:100%}
+.topline{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-bottom:12px}.track{height:7px;background:#e8eef6;border-radius:9px;overflow:hidden;margin-bottom:20px}.fill{height:100%;background:var(--blue);width:0}
+.question{font-size:19px;font-weight:750;line-height:1.4;margin:10px 0 18px}.option{display:block;width:100%;text-align:left;background:white;border:1px solid var(--line);border-radius:12px;padding:14px;margin:9px 0;color:var(--ink)}.option.selected{border:2px solid var(--blue);background:#eff6ff}.option.correct{border-color:var(--green);background:#edfaf4}.option.wrong{border-color:#c43e46;background:#fff1f1}
+.feedback{padding:13px;border-radius:12px;background:#eef5fd;margin:14px 0;font-size:14px;line-height:1.5}.muted{color:var(--muted);font-size:13px}.hidden{display:none!important}.row{display:flex;gap:10px}.row>*{flex:1}.back{background:transparent;color:var(--navy);font-weight:700;padding:5px 0 14px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:24px 8px}
+</style>
+</head>
+<body>
+<header><div class="brand">KPSS CEPTE</div><div class="hero">Her gün bir adım daha ileri.</div><div class="sub">Kısa testler • Anında sonuç • Konu tekrarı</div></header>
+<main>
+<section id="home">
+<div class="stats">
+ <div class="stat"><strong id="total">0</strong><span>Çözülen soru</span></div>
+ <div class="stat"><strong id="correctTotal">0</strong><span>Doğru cevap</span></div>
+ <div class="stat"><strong id="rate">0%</strong><span>Başarı oranı</span></div>
+</div>
+<h2>Bir ders seç</h2>
+<div class="subjects">
+ <button class="subject" onclick="start('Türkçe')"><span class="emoji">📚</span><b>Türkçe</b><small>Paragraf ve dil bilgisi</small></button>
+ <button class="subject" onclick="start('Matematik')"><span class="emoji">➗</span><b>Matematik</b><small>Temel işlemler</small></button>
+ <button class="subject" onclick="start('Tarih')"><span class="emoji">🏛️</span><b>Tarih</b><small>Türk tarihi</small></button>
+ <button class="subject" onclick="start('Coğrafya')"><span class="emoji">🌍</span><b>Coğrafya</b><small>Türkiye coğrafyası</small></button>
+</div>
+<h2>Günlük çalışma</h2>
+<div class="panel"><b>Bugünkü hedefin: 10 soru</b><p class="muted">Şimdilik örnek soru setleriyle başlayalım. Yeni sorular geliştirme aşamasında eklenecek.</p><button class="primary" onclick="start('Karışık')">Teste başla</button></div>
+</section>
+<section id="quiz" class="hidden">
+<button class="back" onclick="goHome()">← Derslere dön</button>
+<div class="topline"><span id="category">Türkçe</span><span id="counter">1 / 3</span></div>
+<div class="track"><div class="fill" id="progress"></div></div>
+<div class="question" id="question"></div>
+<div id="options"></div>
+<div class="feedback hidden" id="feedback"></div>
+<button class="primary" id="check" onclick="checkAnswer()" disabled>Cevabı kontrol et</button>
+<button class="primary hidden" id="next" onclick="nextQuestion()">Sonraki soru</button>
+</section>
+<section id="result" class="hidden">
+<div class="panel" style="text-align:center;padding:28px 18px">
+<div style="font-size:42px">🎉</div><h2 style="margin:8px">Test tamamlandı</h2>
+<div id="resultScore" style="font-size:34px;color:#123b73;font-weight:800">0 / 3</div>
+<p id="resultText" class="muted"></p>
+<button class="primary" onclick="goHome()">Ana sayfaya dön</button>
+</div>
+</section>
+<footer>KPSS Cepte • İlk prototip 0.1<br>Bu uygulama bağımsız bir çalışma projesidir; resmî ÖSYM uygulaması değildir.</footer>
+</main>
+<script>
+const bank=[
+{cat:"Türkçe",q:"Aşağıdaki kelimelerden hangisinin yazımı yanlıştır?",a:["Her şey","Birçok","Hiç bir","Bugün"],c:2,e:"Doğru yazım “hiçbir” şeklindedir; bitişik yazılır."},
+{cat:"Türkçe",q:"“Özenle hazırlanmış bir plan başarıyı kolaylaştırır.” cümlesinde yüklem hangisidir?",a:["Özenle","Hazırlanmış","Bir plan","Kolaylaştırır"],c:3,e:"Cümlenin yargısını bildiren sözcük “kolaylaştırır”dır."},
+{cat:"Türkçe",q:"Aşağıdakilerden hangisi eş anlamlı sözcük çiftidir?",a:["Ak - kara","Yanıt - cevap","Az - çok","Gece - gündüz"],c:1,e:"Yanıt ve cevap aynı anlamda kullanılan sözcüklerdir."},
+{cat:"Matematik",q:"200 sayısının %15'i kaçtır?",a:["20","25","30","35"],c:2,e:"200 × 15 / 100 = 30."},
+{cat:"Matematik",q:"Bir sayının 3 katının 5 fazlası 20 ise sayı kaçtır?",a:["3","5","7","10"],c:1,e:"3x + 5 = 20, buradan x = 5 bulunur."},
+{cat:"Matematik",q:"48 sayısının 1/6'sı kaçtır?",a:["6","8","9","12"],c:1,e:"48 ÷ 6 = 8."},
+{cat:"Tarih",q:"Türkiye Büyük Millet Meclisi hangi tarihte açılmıştır?",a:["19 Mayıs 1919","23 Nisan 1920","29 Ekim 1923","30 Ağustos 1922"],c:1,e:"TBMM, 23 Nisan 1920 tarihinde açılmıştır."},
+{cat:"Tarih",q:"Kurtuluş Savaşı'nın askerî safhasını sona erdiren antlaşma hangisidir?",a:["Mondros","Sevr","Lozan","Ankara"],c:2,e:"Lozan Barış Antlaşması 24 Temmuz 1923'te imzalanmıştır."},
+{cat:"Tarih",q:"Cumhuriyet hangi tarihte ilan edilmiştir?",a:["23 Nisan 1920","1 Kasım 1922","29 Ekim 1923","3 Mart 1924"],c:2,e:"Cumhuriyet 29 Ekim 1923'te ilan edilmiştir."},
+{cat:"Coğrafya",q:"Türkiye'nin en yüksek dağı hangisidir?",a:["Erciyes","Ağrı","Kaçkar","Süphan"],c:1,e:"Ağrı Dağı, 5.137 metre yüksekliğiyle Türkiye'nin en yüksek dağıdır."},
+{cat:"Coğrafya",q:"Karadeniz Bölgesi'nde kıyı boyunca uzanan dağlar genel olarak hangi yöndedir?",a:["Doğu-batı","Kuzey-güney","Kuzeybatı-güneydoğu","Dairesel"],c:0,e:"Kuzey Anadolu Dağları kıyıya paralel, genel olarak doğu-batı yönünde uzanır."},
+{cat:"Coğrafya",q:"Türkiye'de yüzölçümü en büyük göl hangisidir?",a:["Tuz Gölü","Van Gölü","Beyşehir Gölü","Eğirdir Gölü"],c:1,e:"Van Gölü Türkiye'nin yüzölçümü en büyük gölüdür."}
+];
+let list=[],idx=0,selected=-1,correct=0,answered=0;
+const stats=JSON.parse(localStorage.getItem('kpssStats')||'{"total":0,"correct":0}');
+function saveStats(){localStorage.setItem('kpssStats',JSON.stringify(stats));updateStats()}
+function updateStats(){document.getElementById('total').textContent=stats.total;document.getElementById('correctTotal').textContent=stats.correct;document.getElementById('rate').textContent=stats.total?Math.round(stats.correct/stats.total*100)+'%':'0%'}
+function show(id){['home','quiz','result'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id))}
+function goHome(){show('home');updateStats()}
+function start(cat){list=cat==='Karışık'?[...bank].sort(()=>Math.random()-.5).slice(0,5):bank.filter(x=>x.cat===cat);idx=0;correct=0;answered=0;render();show('quiz')}
+function render(){let q=list[idx];selected=-1;document.getElementById('category').textContent=q.cat;document.getElementById('counter').textContent=(idx+1)+' / '+list.length;document.getElementById('progress').style.width=((idx+1)/list.length*100)+'%';document.getElementById('question').textContent=q.q;document.getElementById('options').innerHTML='';q.a.forEach((a,i)=>{let b=document.createElement('button');b.className='option';b.textContent=String.fromCharCode(65+i)+') '+a;b.onclick=()=>choose(i);document.getElementById('options').appendChild(b)});document.getElementById('feedback').classList.add('hidden');document.getElementById('check').classList.remove('hidden');document.getElementById('check').disabled=true;document.getElementById('next').classList.add('hidden')}
+function choose(i){selected=i;document.querySelectorAll('.option').forEach((b,n)=>b.classList.toggle('selected',n===i));document.getElementById('check').disabled=false}
+function checkAnswer(){if(selected<0)return;let q=list[idx],ok=selected===q.c;answered++;if(ok)correct++;stats.total++;if(ok)stats.correct++;saveStats();document.querySelectorAll('.option').forEach((b,n)=>{b.disabled=true;if(n===q.c)b.classList.add('correct');else if(n===selected)b.classList.add('wrong')});let f=document.getElementById('feedback');f.textContent=(ok?'Doğru cevap! ':'Yanlış cevap. ')+q.e;f.classList.remove('hidden');document.getElementById('check').classList.add('hidden');document.getElementById('next').classList.remove('hidden');document.getElementById('next').textContent=idx===list.length-1?'Sonucu gör':'Sonraki soru'}
+function nextQuestion(){if(idx<list.length-1){idx++;render()}else{show('result');document.getElementById('resultScore').textContent=correct+' / '+list.length;document.getElementById('resultText').textContent='Bu testte '+answered+' soru cevapladın. Başarılar!'}}
+updateStats();
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
